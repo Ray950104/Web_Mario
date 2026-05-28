@@ -49,5 +49,6 @@ export default class Leaderboard extends cc.Component {
                 this._scores = [];
             }
         }
+        if (this._scores.length > 5) this._scores.length = 5;
     }
 }

@@ -39,21 +39,45 @@ export default class GameOverScene extends cc.Component {
         if (!this.nameInput) return;
         const name = this.nameInput.string.trim();
         if (name === "") return;
-
+    
         let scores = [];
         const data = cc.sys.localStorage.getItem("leaderboard");
         if (data) {
             try { scores = JSON.parse(data); } catch (e) { scores = []; }
         }
-
+    
         scores.push({ name: name, score: this._score });
         scores.sort((a, b) => b.score - a.score);
-        if (scores.length > 10) scores.length = 10;
-
+        if (scores.length > 5) scores.length = 5;
+    
         cc.sys.localStorage.setItem("leaderboard", JSON.stringify(scores));
-
+    
         if (this.submitMsg) this.submitMsg.string = "Score submitted!";
-        if (this.submitBtn) this.submitBtn.interactable = false;
+        
+        // 隱藏輸入框和按鈕，防止重複提交
+        if (this.submitBtn) this.submitBtn.node.active = false;
+        if (this.nameInput) this.nameInput.node.active = false;
+    
+        this.updateBoard();
+    }
+    
+    private updateBoard() {
+        if (!this.boardLabel) return;
+        const data = cc.sys.localStorage.getItem("leaderboard");
+        let scores = [];
+        if (data) {
+            try { scores = JSON.parse(data); } catch (e) { scores = []; }
+        }
+        const top5 = scores.slice(0, 5);
+        if (top5.length === 0) {
+            this.boardLabel.string = "No scores yet!";
+            return;
+        }
+        let text = "";
+        top5.forEach((entry, i) => {
+            text += (i + 1) + ". " + entry.name + " - " + entry.score + "\n";
+        });
+        this.boardLabel.string = text;
     }
 
     onShowBoard() {
@@ -65,23 +89,6 @@ export default class GameOverScene extends cc.Component {
         if (this.leaderboardPanel) this.leaderboardPanel.active = false;
     }
 
-    private updateBoard() {
-        if (!this.boardLabel) return;
-        const data = cc.sys.localStorage.getItem("leaderboard");
-        let scores = [];
-        if (data) {
-            try { scores = JSON.parse(data); } catch (e) { scores = []; }
-        }
-        if (scores.length === 0) {
-            this.boardLabel.string = "No scores yet!";
-            return;
-        }
-        let text = "";
-        scores.forEach((entry, i) => {
-            text += (i + 1) + ". " + entry.name + " - " + entry.score + "\n";
-        });
-        this.boardLabel.string = text;
-    }
 
     onNext() {
         const gm = cc.find("GameManagerNode");
@@ -100,4 +107,4 @@ export default class GameOverScene extends cc.Component {
         }
         cc.director.loadScene("MenuScene");
     }
-}
+}``
