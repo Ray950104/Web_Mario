@@ -12,15 +12,24 @@ export default class MenuScene extends cc.Component {
         const pm = cc.director.getPhysicsManager();
         pm.enabled = true;
         pm.gravity = cc.v2(0, -960);
-
+    
         if (this.startBtn) this.startBtn.node.on('click', this.onStartGame, this);
         if (this.levelSelectBtn) this.levelSelectBtn.node.on('click', this.onLevelSelect, this);
         if (this.leaderboardBtn) this.leaderboardBtn.node.on('click', this.onShowLeaderboard, this);
-
-        // 一開始隱藏排行榜
+    
         if (this.leaderboardPanel) this.leaderboardPanel.active = false;
-
+    
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
+    
+        // 播 BGM
+        if (!cc.audioEngine.isMusicPlaying()) {
+            let audioNode = cc.find("Canvas/AudioManagerNode");
+            if (!audioNode) audioNode = cc.find("AudioManagerNode");
+            if (audioNode) {
+                const audio = audioNode.getComponent("AudioManager");
+                if (audio) audio.playBGM();
+            }
+        }
     }
 
     onDestroy() {

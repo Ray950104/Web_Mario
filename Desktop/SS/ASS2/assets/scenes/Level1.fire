@@ -10556,6 +10556,9 @@
     "walkSpeed": 100,
     "chaseSpeed": 300,
     "detectRange": 200,
+    "angryClip": {
+      "__uuid__": "6228af9d-16d2-44c2-8fed-b606363b4320"
+    },
     "_id": "e1/k/MfYVK/7TkSQPMubt8"
   },
   {

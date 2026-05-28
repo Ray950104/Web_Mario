@@ -23,6 +23,13 @@ export default class LevelSelect extends cc.Component {
         if (this.backBtn) this.backBtn.on('click', () => cc.director.loadScene("MenuScene"), this);
 
         cc.systemEvent.on(cc.SystemEvent.EventType.KEY_DOWN, this.onKeyDown, this);
+        // 播 BGM
+        let audioNode = cc.find("Canvas/AudioManagerNode");
+        if (!audioNode) audioNode = cc.find("AudioManagerNode");
+        if (audioNode) {
+            const audio = audioNode.getComponent("AudioManager");
+            if (audio) audio.playBGM();
+        }
     }
 
     onDestroy() {

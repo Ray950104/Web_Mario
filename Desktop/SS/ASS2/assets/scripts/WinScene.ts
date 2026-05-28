@@ -34,6 +34,14 @@ export default class WinScene extends cc.Component {
         if (this.closeBoardBtn) this.closeBoardBtn.node.on('click', this.onCloseBoard, this);
 
         if (this.leaderboardPanel) this.leaderboardPanel.active = false;
+        
+        // 播 BGM
+        let audioNode = cc.find("Canvas/AudioManagerNode");
+        if (!audioNode) audioNode = cc.find("AudioManagerNode");
+        if (audioNode) {
+            const audio = audioNode.getComponent("AudioManager");
+            if (audio) audio.playBGM();
+        }
     }
 
     onSubmitScore() {

@@ -78,6 +78,8 @@ export default class Player extends cc.Component {
         if (GameManager.instance) GameManager.instance.startTimer();
     }
 
+    private _falling: boolean = false;
+
     update(dt: number) {
         if (this._isDead) return;
         if (!this._rb) {
@@ -85,7 +87,10 @@ export default class Player extends cc.Component {
             return;
         }
         this.handleMovement();
-        if (this.node.y < -500) this.die();
+        if (this.node.y < -500 && !this._falling) {
+            this._falling = true;
+            this.die();
+        }
     }
 
     private onKeyDown(e: cc.Event.EventKeyboard) {
@@ -221,7 +226,12 @@ export default class Player extends cc.Component {
         if (this._isDead) return;
         this._isDead = true;
     
-        // 不在這裡播音效了，改在 GameManager.loseLife 裡播
+        const audio = this.getAudio();
+        if (audio) {
+            audio.stopBGM();
+            audio.playDie();
+        }
+    
         if (this._anim) this._anim.playDead();
     
         this._rb.linearVelocity = cc.v2(0, 400);
@@ -231,11 +241,6 @@ export default class Player extends cc.Component {
         if (GameManager.instance) {
             GameManager.instance.loseLife();
         } else {
-            const audio = this.getAudio();
-            if (audio) {
-                audio.stopBGM();
-                audio.playDie();
-            }
             this.scheduleOnce(() => {
                 cc.director.loadScene(cc.director.getScene().name);
             }, 2);

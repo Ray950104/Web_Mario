@@ -6,6 +6,8 @@ export default class ChasingGoomba extends cc.Component {
     @property walkSpeed: number = 60;
     @property chaseSpeed: number = 200;
     @property detectRange: number = 400;
+    @property(cc.AudioClip) angryClip: cc.AudioClip = null;
+    private _angryAudioId: number = -1;
 
     private _rb: cc.RigidBody = null;
     private _alive: boolean = true;
@@ -54,15 +56,20 @@ export default class ChasingGoomba extends cc.Component {
         return worldPos.x;
     }
 
+
+   
+
     update(dt: number) {
         if (!this._alive) return;
     
         if (this._turnCooldown > 0) this._turnCooldown -= dt;
     
-        if (!this._playerNode || !this._playerNode.isValid) {
+        if (!this._playerNode) {
             this._playerNode = this.findPlayer();
+            if (!this._playerNode) return; // 還沒找到就跳過
         }
     
+
         let speed = this.walkSpeed;
     
         if (!this._isChasing && this._playerNode && this._playerNode.activeInHierarchy) {
@@ -74,6 +81,10 @@ export default class ChasingGoomba extends cc.Component {
                     this._isChasing = true;
                     this._direction = playerX > myX ? 1 : -1;
                     this.node.color = new cc.Color(255, 100, 100);
+                    // 播放激怒音效（循環）
+                    // if (this.angryClip && this._angryAudioId === -1) {
+                    //     this._angryAudioId = cc.audioEngine.playEffect(this.angryClip, true);
+                    // }
                 }
             }
         }
@@ -155,6 +166,12 @@ export default class ChasingGoomba extends cc.Component {
 
     onStomped() {
         if (!this._alive) return;
+
+        // 停止激怒音效
+        if (this._angryAudioId !== -1) {
+            cc.audioEngine.stopEffect(this._angryAudioId);
+            this._angryAudioId = -1;
+        }
 
         this._hp--;
 

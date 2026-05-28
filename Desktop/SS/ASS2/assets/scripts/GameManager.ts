@@ -58,19 +58,14 @@ export default class GameManager extends cc.Component {
 
     loseLife() {
         this.lives--;
-
+    
         const audio = this.getAudio();
         if (audio) {
             audio.stopBGM();
-            this.scheduleOnce(() => {
-                audio.playDie();
-            }, 0.1);
         }
-
+    
         if (this.lives <= 0) {
-            this.scheduleOnce(() => {
-                if (audio) audio.playGameover();
-            }, 0.5);
+            if (audio) audio.playGameover();
             this.scheduleOnce(() => {
                 cc.director.loadScene("GameOverScene");
             }, 3);
