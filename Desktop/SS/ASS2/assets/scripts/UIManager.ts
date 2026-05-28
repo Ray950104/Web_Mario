@@ -20,7 +20,7 @@ export default class UIManager extends cc.Component {
         if (this.timerLabel) {
             const time = gm.getTimeLeft();
             this.timerLabel.string = String(time);
-            this.timerLabel.node.color = time <= 60 ? cc.Color.RED : cc.Color.WHITE;
+            
         }
     }
 }

@@ -154,29 +154,26 @@ export default class Player extends cc.Component {
         }
 
         // 碰到敵人
+        
         if (otherNode.group === "enemy") {
-            const enemy = otherNode.getComponent("Enemy");
+            // 檢查三種敵人
+            const enemy = otherNode.getComponent("Enemy")
+                || otherNode.getComponent("FlyingGoomba")
+                || otherNode.getComponent("ChasingGoomba");
             if (!enemy || !enemy.isAlive()) return;
 
-            // 用位置判斷：玩家腳底在敵人頭頂以上就算踩頭
             const playerBottom = this.node.y - 13;
             const enemyTop = otherNode.y + 12;
 
-            cc.log("=== playerBottom:", playerBottom, "enemyTop:", enemyTop);
-
             if (playerBottom >= enemyTop) {
-                cc.log("=== STOMP!");
                 enemy.onStomped();
                 let lv = this._rb.linearVelocity;
                 lv.y = this.jumpSpeed * 0.7;
                 this._rb.linearVelocity = lv;
                 const audio = this.getAudio();
-                cc.log("=== audio:", audio);
-                cc.log("=== stompClip:", audio ? audio.stompClip : "null");
                 if (audio) audio.playStomp();
                 if (GameManager.instance) GameManager.instance.addScore(100);
             } else {
-                // 受傷
                 this.getHurt();
             }
         }
