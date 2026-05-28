@@ -66,10 +66,9 @@ export default class ChasingGoomba extends cc.Component {
     
         if (!this._playerNode) {
             this._playerNode = this.findPlayer();
-            if (!this._playerNode) return; // 還沒找到就跳過
+            if (!this._playerNode) return;
         }
     
-
         let speed = this.walkSpeed;
     
         if (!this._isChasing && this._playerNode && this._playerNode.activeInHierarchy) {
@@ -81,10 +80,25 @@ export default class ChasingGoomba extends cc.Component {
                     this._isChasing = true;
                     this._direction = playerX > myX ? 1 : -1;
                     this.node.color = new cc.Color(255, 100, 100);
-                    // 播放激怒音效（循環）
-                    // if (this.angryClip && this._angryAudioId === -1) {
-                    //     this._angryAudioId = cc.audioEngine.playEffect(this.angryClip, true);
-                    // }
+                    // 播放激怒音效
+                    if (this.angryClip && this._angryAudioId === -1) {
+                        this._angryAudioId = cc.audioEngine.playEffect(this.angryClip, true);
+                    }
+                }
+            }
+        }
+    
+        // 離開畫面範圍就靜音
+        if (this._isChasing && this._playerNode) {
+            const playerX = this.getPlayerWorldX();
+            const myX = this.getMyWorldX();
+            if (playerX !== null) {
+                const dist = Math.abs(playerX - myX);
+                if (dist > 800) {
+                    this.stopAngrySound();
+                } else if (this._angryAudioId === -1 && this.angryClip) {
+                    // 回到範圍內恢復播放
+                    this._angryAudioId = cc.audioEngine.playEffect(this.angryClip, true);
                 }
             }
         }
@@ -99,18 +113,26 @@ export default class ChasingGoomba extends cc.Component {
     
         this.node.scaleX = this._direction > 0 ? -1 : 1;
     
-        // 只有巡邏時才偵測懸崖
         if (!this._isChasing && this._turnCooldown <= 0) {
             this.checkCliffSimple();
         }
     
-        // 邊界
         if (this.node.x < -480) { this.node.x = -479; this._direction = 1; this._turnCooldown = 0.3; }
         if (this.node.x > 4500) { this.node.x = 4499; this._direction = -1; this._turnCooldown = 0.3; }
     
-        if (this.node.y < -500) this.node.destroy();
+        if (this.node.y < -500) {
+            this.stopAngrySound();
+            this.node.destroy();
+        }
     }
-
+    private stopAngrySound() {
+        if (this._angryAudioId !== -1) {
+            cc.audioEngine.stopEffect(this._angryAudioId);
+            this._angryAudioId = -1;
+        }
+    
+    }
+    
     
 
     onBeginContact(contact: cc.PhysicsContact, self: cc.PhysicsCollider, other: cc.PhysicsCollider) {
@@ -118,18 +140,18 @@ export default class ChasingGoomba extends cc.Component {
     
         const otherNode = other.node;
     
-        // 追蹤地面（我在對方上面 = 踩在地上）
+        // 踩在地面上
         if (otherNode.group === "ground" || otherNode.group === "platform") {
             if (this.node.y > otherNode.y) {
                 this._groundCount++;
                 this._onGround = true;
-                return; // 踩在上面不算撞牆，直接 return
+                return;
             }
         }
     
         if (this._turnCooldown > 0) return;
     
-        // 撞到側面才反轉
+        // 撞到牆壁側面就反轉（追人和巡邏都反轉）
         if (otherNode.group === "ground" || otherNode.group === "platform") {
             if (this.node.x < otherNode.x) {
                 this._direction = -1;
@@ -139,6 +161,7 @@ export default class ChasingGoomba extends cc.Component {
             this._turnCooldown = 0.3;
         }
     
+        // 碰到其他敵人也反轉
         if (otherNode.group === "enemy" && otherNode !== this.node) {
             this._direction = -this._direction;
             this._turnCooldown = 0.3;
@@ -164,14 +187,15 @@ export default class ChasingGoomba extends cc.Component {
 
     isAlive(): boolean { return this._alive; }
 
+    onDestroy() {
+        this.stopAngrySound();
+    }
+  
     onStomped() {
         if (!this._alive) return;
 
         // 停止激怒音效
-        if (this._angryAudioId !== -1) {
-            cc.audioEngine.stopEffect(this._angryAudioId);
-            this._angryAudioId = -1;
-        }
+        this.stopAngrySound();
 
         this._hp--;
 

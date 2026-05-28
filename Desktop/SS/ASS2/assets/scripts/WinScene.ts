@@ -19,13 +19,15 @@ export default class WinScene extends cc.Component {
 
     onLoad() {
         const gm = cc.find("GameManagerNode");
-        if (gm) {
-            const gmScript = gm.getComponent("GameManager");
-            if (gmScript) {
-                this._score = gmScript.score;
-                if (this.scoreLabel) this.scoreLabel.string = "SCORE: " + this._score;
-            }
+    cc.log("=== WinScene gm:", gm);
+    if (gm) {
+        const gmScript = gm.getComponent("GameManager");
+        cc.log("=== score:", gmScript.score, "lives:", gmScript.lives);
+        if (gmScript) {
+            this._score = gmScript.score;
+            if (this.scoreLabel) this.scoreLabel.string = "SCORE: " + this._score;
         }
+    }
 
         if (this.nextBtn) this.nextBtn.node.on('click', this.onNext, this);
         if (this.menuBtn) this.menuBtn.node.on('click', this.onMenu, this);

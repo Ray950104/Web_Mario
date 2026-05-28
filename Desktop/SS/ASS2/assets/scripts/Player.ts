@@ -69,13 +69,14 @@ export default class Player extends cc.Component {
     }
 
     start() {
-        const audio = this.getAudio();
-        if (audio) {
-            if (!cc.audioEngine.isMusicPlaying()) {
+        // 延遲 4.5 秒再播 BGM 和啟動計時器（等 GameStart 倒數完）
+        this.scheduleOnce(() => {
+            const audio = this.getAudio();
+            if (audio && !cc.audioEngine.isMusicPlaying()) {
                 audio.playBGM();
             }
-        }
-        if (GameManager.instance) GameManager.instance.startTimer();
+            if (GameManager.instance) GameManager.instance.startTimer();
+        }, 4.5);
     }
 
     private _falling: boolean = false;
